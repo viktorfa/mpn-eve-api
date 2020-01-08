@@ -1,0 +1,69 @@
+# Welcome to Serverless!
+#
+# This file is the main config file for your service.
+# It's very minimal at this point and uses default values.
+# You can always add more config options for more control.
+# We've included some commented out config examples here.
+# Just uncomment any of them to get that config option.
+#
+# For full config options, check the docs:
+#    docs.serverless.com
+#
+# Happy Coding!
+
+service: mpn-eve
+# app and org for use with dashboard.serverless.com
+#app: your-app-name
+#org: your-org-name
+
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+# frameworkVersion: "=X.X.X"
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: eu-central-1
+  stage: ${self:custom.vars.stage, "dev"}
+  logRetentionInDays: ${self:custom.vars.logRetentionInDays, 1}
+  profile: serverless-mpn-admin
+
+  memorySize: 1024
+  timeout: 5
+
+  environment:
+    MONGO_HOST: ${env:MONGO_HOST}
+    MONGO_PORT: ${env:MONGO_PORT}
+    MONGO_DATABASE: ${env:MONGO_DATABASE}
+    MONGO_USER: ${env:MONGO_USER}
+    MONGO_PASSWORD: ${env:MONGO_PASSWORD}
+
+functions:
+  api:
+    handler: wsgi_handler.handler
+    events:
+      - http: ANY /
+      - http: ANY {proxy+}
+
+package:
+  include:
+    - "src/**"
+  exclude:
+    - ./**
+
+plugins:
+  - serverless-wsgi
+  - serverless-python-requirements
+
+custom:
+  vars: ${file(./sls-config.js)}
+  wsgi:
+    app: src.main.app
+    packRequirements: false
+    pythonRequirements:
+      # dockerizePip: true # Had some problem with C libs in python if using no-linux
+      slim: true # Omits tests, __pycache__, *.pyc etc from dependencies
+      # Caching pip
+      useDownloadCache: true
+      useStaticCache: true
+      fileName: requirements.txt

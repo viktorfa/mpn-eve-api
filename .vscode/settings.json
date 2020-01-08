@@ -1,0 +1,11 @@
+{
+  "python.linting.pylintEnabled": true,
+  "python.linting.enabled": true,
+  "python.formatting.provider": "black",
+  "python.venvPath": "~/.virtualenvs",
+  "python.pythonPath": "~/.virtualenvs/mpn/bin/python",
+  "files.exclude": {
+    "**/*.pyc": { "when": "$(basename).py" },
+    "**/__pycache__": true
+  }
+}
